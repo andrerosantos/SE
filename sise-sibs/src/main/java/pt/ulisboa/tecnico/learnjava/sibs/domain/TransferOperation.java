@@ -8,6 +8,8 @@ public class TransferOperation extends Operation {
 	private final String targetIban;
 	private String state;
 	private final Services services; // can I make this static? - no need to have multiple services occupying memory
+	
+	//private State state; ??
 
 	public enum states {
 		REGISTERED("registered"), WITHDRAWN("withdrawn"), DEPOSITED("deposited"), COMPLETED("completed"),
@@ -44,7 +46,7 @@ public class TransferOperation extends Operation {
 	public void process() {
 		if (this.state.contentEquals(states.REGISTERED.getPrefix())) {
 
-			// ToDo
+			// ToDo - invoke services.withdraw
 
 			this.state = states.WITHDRAWN.getPrefix();
 		} else if (this.state.equals(states.WITHDRAWN.getPrefix())) {
@@ -56,7 +58,7 @@ public class TransferOperation extends Operation {
 		return this.state;
 	}
 
-	public void cancel() {
+	public void cancel() throws OperationException {
 		this.state = states.CANCELED.getPrefix();
 	}
 
