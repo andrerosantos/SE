@@ -103,7 +103,7 @@ public class TransferOperationConstructorMethodTest {
 	}
 
 	@Test
-	public void testCancellOperation() throws OperationException {
+	public void testCancelOperation() throws OperationException {
 		TransferOperation op = new TransferOperation(SOURCE_IBAN, TARGET_IBAN, 100);
 
 		op.process();
@@ -111,6 +111,11 @@ public class TransferOperationConstructorMethodTest {
 		op.cancel();
 
 		assertEquals(TransferOperation.states.CANCELED, op.getState());
+	}
+
+	@Test
+	public void testCancelFail() {
+
 	}
 
 	@After
