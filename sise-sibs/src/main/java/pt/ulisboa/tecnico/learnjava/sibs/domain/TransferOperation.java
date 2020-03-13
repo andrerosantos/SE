@@ -7,11 +7,12 @@ public class TransferOperation extends Operation {
 	private final String sourceIban;
 	private final String targetIban;
 	private String state;
-	private final Services services; //can I make this static? - no need to have multiple services occupying memory
-	
+	private final Services services; // can I make this static? - no need to have multiple services occupying memory
+
 	public enum states {
-		REGISTERED("registered"), WITHDRAWN("withdrawn"), DEPOSITED("deposited"), COMPLETED("completed"), CANCELED("canceled");
-		
+		REGISTERED("registered"), WITHDRAWN("withdrawn"), DEPOSITED("deposited"), COMPLETED("completed"),
+		CANCELED("canceled");
+
 		private final String prefix;
 
 		states(String prefix) {
@@ -39,22 +40,24 @@ public class TransferOperation extends Operation {
 	private boolean invalidString(String name) {
 		return name == null || name.length() == 0;
 	}
-	
+
 	public void process() {
 		if (this.state.contentEquals(states.REGISTERED.getPrefix())) {
-			
-			// ToDo - see what else to do
-			
+
+			// ToDo
+
 			this.state = states.WITHDRAWN.getPrefix();
-		} else if (this.state.equals(states.WITHDRAWN.getPrefix())){
-			
-			
-			
+		} else if (this.state.equals(states.WITHDRAWN.getPrefix())) {
+
 		}
 	}
-	
+
 	public String getState() {
 		return this.state;
+	}
+
+	public void cancel() {
+		this.state = states.CANCELED.getPrefix();
 	}
 
 	@Override
