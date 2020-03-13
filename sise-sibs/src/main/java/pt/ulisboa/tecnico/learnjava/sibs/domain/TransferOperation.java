@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.learnjava.sibs.domain;
 
+import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.bank.services.Services;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 
@@ -43,11 +44,13 @@ public class TransferOperation extends Operation {
 		return name == null || name.length() == 0;
 	}
 
-	public void process() {
+	public void process() throws AccountException {
 		if (this.state.contentEquals(states.REGISTERED.getPrefix())) {
 
 			// ToDo - invoke services.withdraw
 
+			this.services.withdraw(sourceIban, this.getValue());
+			
 			this.state = states.WITHDRAWN.getPrefix();
 		} else if (this.state.equals(states.WITHDRAWN.getPrefix())) {
 
