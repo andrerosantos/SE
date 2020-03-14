@@ -7,18 +7,18 @@ import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 public class TransferOperation extends Operation {
 	private final String sourceIban;
 	private final String targetIban;
-	private String state;
+	private OperationState state;
 	private final Services services; // can I make this static? - no need to have multiple services occupying memory
 	
 	//private State state; ??
 
-	public enum states {
-		REGISTERED("registered"), WITHDRAWN("withdrawn"), DEPOSITED("deposited"), COMPLETED("completed"),
-		CANCELED("canceled");
+	public enum OperationState {
+		REGISTERED("RG"), WITHDRAWN("WD"), DEPOSITED("DP"), COMPLETED("CP"),
+		CANCELED("CL");
 
 		private final String prefix;
 
-		states(String prefix) {
+		OperationState(String prefix) {
 			this.prefix = prefix;
 		}
 
@@ -36,7 +36,7 @@ public class TransferOperation extends Operation {
 
 		this.sourceIban = sourceIban;
 		this.targetIban = targetIban;
-		this.state = states.REGISTERED.getPrefix();
+		this.state = OperationState.REGISTERED;
 		this.services = new Services();
 	}
 
@@ -44,25 +44,53 @@ public class TransferOperation extends Operation {
 		return name == null || name.length() == 0;
 	}
 
-	public void process() throws AccountException {
-		if (this.state.contentEquals(states.REGISTERED.getPrefix())) {
+	public void process() throws AccountException, OperationException {
+		if (this.state == OperationState.REGISTERED) {
 
-			// ToDo - invoke services.withdraw
-
-			this.services.withdraw(sourceIban, this.getValue());
+			this.services.withdraw(sourceIban, getValue());
+			this.state = OperationState.WITHDRAWN;
 			
-			this.state = states.WITHDRAWN.getPrefix();
-		} else if (this.state.equals(states.WITHDRAWN.getPrefix())) {
-
+		} else if (this.state == OperationState.WITHDRAWN && sourceIban.substring(0, 3).contentEquals(targetIban.substring(0, 3))){
+			// same bank: deposit and complete
+			this.services.deposit(targetIban, getValue());
+			this.state = OperationState.COMPLETED;
+			
+		} else if (this.state == OperationState.WITHDRAWN && !sourceIban.substring(0, 3).contentEquals(targetIban.substring(0, 3))) {
+			//deposit money on target account
+			this.services.deposit(targetIban, getValue());
+			this.state = OperationState.DEPOSITED;
+			
+		} else if (this.state == OperationState.DEPOSITED) {
+			//charge fee
+			this.services.withdraw(sourceIban, this.commission());
+			this.state = OperationState.COMPLETED;
+			
+		} else {
+			throw new OperationException("Cannot process a canceled operration.");
 		}
 	}
 
-	public String getState() {
+	public OperationState getState() {
 		return this.state;
 	}
 
-	public void cancel() throws OperationException {
-		this.state = states.CANCELED.getPrefix();
+	public void cancel() throws OperationException, AccountException {
+		if (this.state == OperationState.WITHDRAWN) {
+			this.services.deposit(sourceIban, getValue());
+			this.state = OperationState.CANCELED;
+			
+		} else if (this.state == OperationState.DEPOSITED) {
+			this.services.withdraw(targetIban, getValue());
+			this.services.deposit(sourceIban, getValue());
+			this.state = OperationState.CANCELED;
+			
+		} else if (this.state == OperationState.REGISTERED) {
+			this.state = OperationState.CANCELED;
+			
+		} else {
+			throw new OperationException("Cannot cancel a completed operation.");
+		}
+		
 	}
 
 	@Override

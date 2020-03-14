@@ -1,6 +1,7 @@
 package pt.ulisboa.tecnico.learnjava.sibs.operation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,7 +27,6 @@ public class TransferOperationConstructorMethodTest {
 	private static final int age = 25;
 	private static final int VALUE = 100;
 	
-	private Sibs sibs;
 	private Bank sourceBank;
 	private Bank targetBank;
 	private Client sourceClient;
@@ -35,17 +35,15 @@ public class TransferOperationConstructorMethodTest {
 	private String sourceIban;
 	private String targetIban;
 	
-
 	@Before
 	public void setUp() throws BankException, ClientException, AccountException {
 		this.services = new Services();
-		this.sibs = new Sibs(10, this.services);
 		this.sourceBank = new Bank("CGD");
 		this.targetBank = new Bank("BPI");
 		this.sourceClient = new Client(sourceBank, firstName, lastName, nif, phoneNumber, address, age);
 		this.targetClient = new Client(targetBank, firstName, lastName, nif, phoneNumber, address, age);
 		this.sourceIban = sourceBank.createAccount(Bank.AccountType.CHECKING, sourceClient, 1000, 0);
-		this.targetIban = sourceBank.createAccount(Bank.AccountType.CHECKING, targetClient, 1000, 0);
+		this.targetIban = targetBank.createAccount(Bank.AccountType.CHECKING, targetClient, 1000, 0);
 	}
 
 	@Test
@@ -86,7 +84,9 @@ public class TransferOperationConstructorMethodTest {
 	@Test
 	public void testRegistered() throws OperationException {
 		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
-		assertEquals(TransferOperation.states.REGISTERED, op.getState());
+		assertEquals(TransferOperation.OperationState.REGISTERED, op.getState());
+		assertEquals(1000, this.services.getAccountByIban(sourceIban).getBalance());
+		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
 	}
 
 	@Test
@@ -95,18 +95,24 @@ public class TransferOperationConstructorMethodTest {
 
 		op.process();
 
-		assertEquals(TransferOperation.states.WITHDRAWN, op.getState());
+		assertEquals(TransferOperation.OperationState.WITHDRAWN, op.getState());
+		assertEquals(900, this.services.getAccountByIban(sourceIban).getBalance());
+		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
 	}
 
 	@Test
-	public void testCompletedNoFee() throws OperationException, AccountException {
-		String targetWithSourceBank = "BPICK2";
+	public void testCompletedNoFee() throws OperationException, AccountException, ClientException, BankException {
+		Client newClient = new Client(sourceBank, firstName, lastName, "111111111", phoneNumber, address, age);
+		String targetWithSourceBank = sourceBank.createAccount(Bank.AccountType.CHECKING, newClient, 1000, 0);
+		
 		TransferOperation op = new TransferOperation(this.sourceIban, targetWithSourceBank, 100);
 
 		op.process();
 		op.process();
 
-		assertEquals(TransferOperation.states.COMPLETED, op.getState());
+		assertEquals(TransferOperation.OperationState.COMPLETED, op.getState());
+		assertEquals(900, this.services.getAccountByIban(sourceIban).getBalance());
+		assertEquals(1100, this.services.getAccountByIban(targetWithSourceBank).getBalance());
 	}
 
 	@Test
@@ -116,7 +122,9 @@ public class TransferOperationConstructorMethodTest {
 		op.process();
 		op.process();
 
-		assertEquals(TransferOperation.states.DEPOSITED, op.getState());
+		assertEquals(TransferOperation.OperationState.DEPOSITED, op.getState());
+		assertEquals(900, this.services.getAccountByIban(sourceIban).getBalance());
+		assertEquals(1100, this.services.getAccountByIban(targetIban).getBalance());
 	}
 
 	@Test
@@ -127,28 +135,74 @@ public class TransferOperationConstructorMethodTest {
 		op.process();
 		op.process();
 
-		assertEquals(TransferOperation.states.COMPLETED, op.getState());
+		assertEquals(TransferOperation.OperationState.COMPLETED, op.getState());
+		assertEquals(894, this.services.getAccountByIban(sourceIban).getBalance());
+		assertEquals(1100, this.services.getAccountByIban(targetIban).getBalance());
 	}
 
 	@Test
-	public void testCancelOperation() throws OperationException, AccountException {
+	public void testCancelRegisteredOperation() throws OperationException, AccountException {
+		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
+
+		op.cancel();
+
+		assertEquals(TransferOperation.OperationState.CANCELED, op.getState());
+	}
+	
+	@Test
+	public void testCancelWithdrawnOperation() throws OperationException, AccountException {
 		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
 
 		op.process();
 
 		op.cancel();
 
-		assertEquals(TransferOperation.states.CANCELED, op.getState());
+		assertEquals(TransferOperation.OperationState.CANCELED, op.getState());
+		assertEquals(1000, this.services.getAccountByIban(sourceIban).getBalance());
+		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
+	}
+	
+	
+	@Test
+	public void testCancelDepositedOperation() throws OperationException, AccountException {
+		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
+
+		op.process();
+		op.process();
+
+		op.cancel();
+
+		assertEquals(TransferOperation.OperationState.CANCELED, op.getState());
+		assertEquals(1000, this.services.getAccountByIban(sourceIban).getBalance());
+		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
 	}
 
-	@Test
-	public void testCancelFail() {
+	@Test(expected=OperationException.class)
+	public void processCanceledOperation() throws OperationException, AccountException {
+		TransferOperation op = new TransferOperation(this.sourceIban,this.targetIban, 100);
 		
+		op.cancel();
+		op.process();
+	}
+	
+	@Test
+	public void testCancelFail() throws OperationException, AccountException {
+		TransferOperation op = new TransferOperation(this.sourceIban,this.targetIban, 100);
+		
+		op.process();
+		op.process();
+		op.process();
+		
+		try {
+			op.cancel();
+			fail();
+		} catch (OperationException e) { }
 	}
 
 	@After
 	public void tearDown() {
 		Bank.clearBanks();
+		this.services = null;
 	}
 
 }
