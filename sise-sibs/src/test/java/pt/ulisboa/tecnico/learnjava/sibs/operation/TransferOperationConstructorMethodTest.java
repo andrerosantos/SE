@@ -14,9 +14,13 @@ import pt.ulisboa.tecnico.learnjava.bank.exceptions.BankException;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.ClientException;
 import pt.ulisboa.tecnico.learnjava.bank.services.Services;
 import pt.ulisboa.tecnico.learnjava.sibs.domain.Operation;
-import pt.ulisboa.tecnico.learnjava.sibs.domain.Sibs;
 import pt.ulisboa.tecnico.learnjava.sibs.domain.TransferOperation;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Canceled;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Completed;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Deposited;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Registered;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Withdrawn;
 
 public class TransferOperationConstructorMethodTest {
 	private static final String firstName = "John";
@@ -84,7 +88,7 @@ public class TransferOperationConstructorMethodTest {
 	@Test
 	public void testRegistered() throws OperationException {
 		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
-		assertEquals(TransferOperation.OperationState.REGISTERED, op.getState());
+		assertEquals(Registered.instance(), op.getState());
 		assertEquals(1000, this.services.getAccountByIban(sourceIban).getBalance());
 		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
 	}
@@ -95,7 +99,7 @@ public class TransferOperationConstructorMethodTest {
 
 		op.process();
 
-		assertEquals(TransferOperation.OperationState.WITHDRAWN, op.getState());
+		assertEquals(Withdrawn.instance(), op.getState());
 		assertEquals(900, this.services.getAccountByIban(sourceIban).getBalance());
 		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
 	}
@@ -110,7 +114,7 @@ public class TransferOperationConstructorMethodTest {
 		op.process();
 		op.process();
 
-		assertEquals(TransferOperation.OperationState.COMPLETED, op.getState());
+		assertEquals(Completed.instance(), op.getState());
 		assertEquals(900, this.services.getAccountByIban(sourceIban).getBalance());
 		assertEquals(1100, this.services.getAccountByIban(targetWithSourceBank).getBalance());
 	}
@@ -122,7 +126,7 @@ public class TransferOperationConstructorMethodTest {
 		op.process();
 		op.process();
 
-		assertEquals(TransferOperation.OperationState.DEPOSITED, op.getState());
+		assertEquals(Deposited.instance(), op.getState());
 		assertEquals(900, this.services.getAccountByIban(sourceIban).getBalance());
 		assertEquals(1100, this.services.getAccountByIban(targetIban).getBalance());
 	}
@@ -135,7 +139,7 @@ public class TransferOperationConstructorMethodTest {
 		op.process();
 		op.process();
 
-		assertEquals(TransferOperation.OperationState.COMPLETED, op.getState());
+		assertEquals(Completed.instance(), op.getState());
 		assertEquals(894, this.services.getAccountByIban(sourceIban).getBalance());
 		assertEquals(1100, this.services.getAccountByIban(targetIban).getBalance());
 	}
@@ -146,7 +150,7 @@ public class TransferOperationConstructorMethodTest {
 
 		op.cancel();
 
-		assertEquals(TransferOperation.OperationState.CANCELED, op.getState());
+		assertEquals(Canceled.instance(), op.getState());
 	}
 	
 	@Test
@@ -157,7 +161,7 @@ public class TransferOperationConstructorMethodTest {
 
 		op.cancel();
 
-		assertEquals(TransferOperation.OperationState.CANCELED, op.getState());
+		assertEquals(Canceled.instance(), op.getState());
 		assertEquals(1000, this.services.getAccountByIban(sourceIban).getBalance());
 		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
 	}
@@ -172,7 +176,7 @@ public class TransferOperationConstructorMethodTest {
 
 		op.cancel();
 
-		assertEquals(TransferOperation.OperationState.CANCELED, op.getState());
+		assertEquals(Canceled.instance(), op.getState());
 		assertEquals(1000, this.services.getAccountByIban(sourceIban).getBalance());
 		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
 	}
@@ -196,7 +200,9 @@ public class TransferOperationConstructorMethodTest {
 		try {
 			op.cancel();
 			fail();
-		} catch (OperationException e) { }
+		} catch (OperationException e) {
+			assertEquals(Completed.instance(), op.getState());
+		}
 	}
 
 	@After

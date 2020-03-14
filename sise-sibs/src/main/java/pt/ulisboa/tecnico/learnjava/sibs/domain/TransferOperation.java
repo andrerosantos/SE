@@ -3,29 +3,18 @@ package pt.ulisboa.tecnico.learnjava.sibs.domain;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.bank.services.Services;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Canceled;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Completed;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Deposited;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Registered;
+import pt.ulisboa.tecnico.learnjava.sibs.states.State;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Withdrawn;
 
 public class TransferOperation extends Operation {
 	private final String sourceIban;
 	private final String targetIban;
-	private OperationState state;
+	private State state;
 	private final Services services; // can I make this static? - no need to have multiple services occupying memory
-	
-	//private State state; ??
-
-	public enum OperationState {
-		REGISTERED("RG"), WITHDRAWN("WD"), DEPOSITED("DP"), COMPLETED("CP"),
-		CANCELED("CL");
-
-		private final String prefix;
-
-		OperationState(String prefix) {
-			this.prefix = prefix;
-		}
-
-		public String getPrefix() {
-			return this.prefix;
-		}
-	}
 
 	public TransferOperation(String sourceIban, String targetIban, int value) throws OperationException {
 		super(Operation.OPERATION_TRANSFER, value);
@@ -36,7 +25,7 @@ public class TransferOperation extends Operation {
 
 		this.sourceIban = sourceIban;
 		this.targetIban = targetIban;
-		this.state = OperationState.REGISTERED;
+		this.state = Registered.instance();
 		this.services = new Services();
 	}
 
@@ -45,47 +34,47 @@ public class TransferOperation extends Operation {
 	}
 
 	public void process() throws AccountException, OperationException {
-		if (this.state == OperationState.REGISTERED) {
+		if (this.state == Registered.instance()) {
 
 			this.services.withdraw(sourceIban, getValue());
-			this.state = OperationState.WITHDRAWN;
+			this.state = Withdrawn.instance();
 			
-		} else if (this.state == OperationState.WITHDRAWN && sourceIban.substring(0, 3).contentEquals(targetIban.substring(0, 3))){
+		} else if (this.state == Withdrawn.instance() && sourceIban.substring(0, 3).contentEquals(targetIban.substring(0, 3))){
 			// same bank: deposit and complete
 			this.services.deposit(targetIban, getValue());
-			this.state = OperationState.COMPLETED;
+			this.state = Completed.instance();
 			
-		} else if (this.state == OperationState.WITHDRAWN && !sourceIban.substring(0, 3).contentEquals(targetIban.substring(0, 3))) {
+		} else if (this.state == Withdrawn.instance() && !sourceIban.substring(0, 3).contentEquals(targetIban.substring(0, 3))) {
 			//deposit money on target account
 			this.services.deposit(targetIban, getValue());
-			this.state = OperationState.DEPOSITED;
+			this.state = Deposited.instance();
 			
-		} else if (this.state == OperationState.DEPOSITED) {
+		} else if (this.state == Deposited.instance()) {
 			//charge fee
 			this.services.withdraw(sourceIban, this.commission());
-			this.state = OperationState.COMPLETED;
+			this.state = Completed.instance();
 			
 		} else {
 			throw new OperationException("Cannot process a canceled operration.");
 		}
 	}
 
-	public OperationState getState() {
+	public State getState() {
 		return this.state;
 	}
 
 	public void cancel() throws OperationException, AccountException {
-		if (this.state == OperationState.WITHDRAWN) {
+		if (this.state == Withdrawn.instance()) {
 			this.services.deposit(sourceIban, getValue());
-			this.state = OperationState.CANCELED;
+			this.state = Canceled.instance();
 			
-		} else if (this.state == OperationState.DEPOSITED) {
+		} else if (this.state == Deposited.instance()) {
 			this.services.withdraw(targetIban, getValue());
 			this.services.deposit(sourceIban, getValue());
-			this.state = OperationState.CANCELED;
+			this.state = Canceled.instance();
 			
-		} else if (this.state == OperationState.REGISTERED) {
-			this.state = OperationState.CANCELED;
+		} else if (this.state == Registered.instance()) {
+			this.state = Canceled.instance();
 			
 		} else {
 			throw new OperationException("Cannot cancel a completed operation.");
