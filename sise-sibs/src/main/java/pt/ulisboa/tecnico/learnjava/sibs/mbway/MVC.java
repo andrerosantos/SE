@@ -38,9 +38,7 @@ public class MVC {
 					// friend <PHONE_NUMBER> <AMOUNT>
 
 				}
-
 			}  
 		}
 	}
-
 }
