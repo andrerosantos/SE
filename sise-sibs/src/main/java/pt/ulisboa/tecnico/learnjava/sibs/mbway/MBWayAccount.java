@@ -42,8 +42,13 @@ public class MBWayAccount {
 		return accounts.get(phoneNumber);
 	}
 	
-	public void validateAccount() {
-		this.confirmed = true;
+	public boolean validateAccount(int confirmationNumber) {
+		if (confirmationNumber == this.nConfirmation) {
+			this.confirmed = true;
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	public boolean isConfirmed() {
