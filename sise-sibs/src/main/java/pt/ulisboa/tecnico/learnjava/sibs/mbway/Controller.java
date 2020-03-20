@@ -2,19 +2,28 @@ package pt.ulisboa.tecnico.learnjava.sibs.mbway;
 
 import java.util.HashMap;
 
+import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.bank.services.Services;
+import pt.ulisboa.tecnico.learnjava.sibs.domain.Sibs;
+import pt.ulisboa.tecnico.learnjava.sibs.exceptions.MBWayException;
+import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
+import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
 
 public class Controller {
 	private View view = new View();
 	private boolean running = true;
-	
+	private Services service = new Services();
+	private Sibs sibs = new Sibs(100, service);
 	
 	public Controller() { }
 
-	public void createMBWay(String iban, int phoneNumber) {
+	public void createMBWay(String iban, int phoneNumber)  {
+		try {
 		MBWayAccount model = new MBWayAccount(iban, phoneNumber);
-		
 		view.printConfirmationCode(model.getConfirmationCode());
+		} catch (MBWayException e) {
+			view.printException(e.getMessage());
+		}
 	}
 	
 	public void confirmAccount(int phoneNumber, int confirmationCode) {
@@ -26,7 +35,7 @@ public class Controller {
 		}
 	}
 	
-	public void transfer(int sourcePhoneNumber, int targetPhoneNumber, int amount) {
+	public void transfer(int sourcePhoneNumber, int targetPhoneNumber, int amount) throws SibsException, AccountException, OperationException {
 		MBWayAccount source = MBWayAccount.getMBWayAccount(sourcePhoneNumber);
 		MBWayAccount target = MBWayAccount.getMBWayAccount(targetPhoneNumber);
 		
@@ -38,12 +47,9 @@ public class Controller {
 			view.printAccountNotConfirmed(targetPhoneNumber);
 		} else {
 			
-			//ToDo
-			//transfer money
-			
-			
-			
+			sibs.transfer(source.getIban(), target.getIban(), amount);
 			view.printSuccessfulTransfer();
+			
 		}
 	}
 	

@@ -3,6 +3,10 @@ package MBWay;
 import org.junit.Before;
 import org.junit.Test;
 
+import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
+import pt.ulisboa.tecnico.learnjava.sibs.exceptions.MBWayException;
+import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
+import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
 import pt.ulisboa.tecnico.learnjava.sibs.mbway.Controller;
 import pt.ulisboa.tecnico.learnjava.sibs.mbway.MBWayAccount;
 import pt.ulisboa.tecnico.learnjava.sibs.mbway.MVC;
@@ -15,7 +19,7 @@ import java.util.stream.Stream;
 
 import org.junit.After;
 
-public class MBWayTest {
+public class ControllerClassTest {
 	private int PHONE_NUMBER = 912345678;
 	
 	private Controller controller;
@@ -41,7 +45,7 @@ public class MBWayTest {
 	}
 	
 	@Test
-	public void confirmMBWayAccountTest() {
+	public void confirmMBWayAccountTest() throws MBWayException {
 		MBWayAccount account = new MBWayAccount(iban, PHONE_NUMBER);
 		
 		controller.confirmAccount(PHONE_NUMBER, account.getConfirmationCode());
@@ -50,14 +54,12 @@ public class MBWayTest {
 	}
 	
 	@Test
-	public void transferMoneyTest() {
+	public void transferMoneyTest() throws MBWayException, SibsException, AccountException, OperationException {
 		MBWayAccount account = new MBWayAccount(iban, PHONE_NUMBER);
 		MBWayAccount account2 = new MBWayAccount("ola", 999999999);
 		
 		controller.transfer(PHONE_NUMBER, 999999999, 100);
 	}
-	
-	
 	
 	
 	@After

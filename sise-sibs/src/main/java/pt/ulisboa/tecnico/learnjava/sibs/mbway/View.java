@@ -55,4 +55,8 @@ public class View {
 	public void printFriendWithoutMoney() {
 		System.out.println("Oh no! One friend does not have money to pay!");
 	}
+	
+	public void printException(String message) {
+		System.out.println(message);
+	}
 }
