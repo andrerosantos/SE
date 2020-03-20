@@ -35,8 +35,7 @@ public class Controller {
 	
 	public void confirmAccount(int phoneNumber, int confirmationCode) {
 		MBWayAccount account = MBWayAccount.getMBWayAccount(phoneNumber);
-		if (confirmationCode == account.getConfirmationCode()) {
-			account.validateAccount(confirmationCode);
+		if (account.validateAccount(confirmationCode)) {
 			view.printConfirmationResult(true);
 		} else {
 			view.printConfirmationResult(false);
@@ -54,6 +53,7 @@ public class Controller {
 		} else if (!source.isConfirmed()) {
 			view.printAccountNotConfirmed(targetPhoneNumber);
 		} else {
+			//transfer money
 			view.printSuccessfulTransfer();
 		}
 	}

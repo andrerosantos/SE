@@ -4,41 +4,74 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class MVC {
-	private static Scanner SCANNER = new Scanner(System.in);
-
 	public static void main(String[] args) {
 		Controller controller = new Controller();
-
-		while (true) {
+		
+		boolean running = true;
+		Scanner s = new Scanner(System.in);
+		String input;
+		String[] inputs;
+		String command;
+		
+		while (running) {
+			
 			System.out.println("Insert command: ");
-			String input = SCANNER.nextLine();
-			String[] inputs = input.split(" ");
+			input = s.nextLine();
+			inputs = input.split(" ");
+			command = inputs[0];
 
-
-			if(input.equals("exit")) { 
+			switch (command) {
+			case "exit":
+				running = false;
 				System.out.println("You exit the app.");
 				break; 
-
-			} else if (inputs[0].contentEquals("associate-mbway")) {
+				
+			case "associate-mbway":
 				controller.createMBWay(inputs[1], Integer.parseInt(inputs[2]));
-
-			} else if (inputs[0].contentEquals("confirm-mbway")) {
+				
+			case "confirm-mbway":
 				controller.confirmAccount(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]));
-
-			} else if (inputs[0].contentEquals("mbway-transfer")) {
-				// mbway-transfer <SOURCE_PHONE_NUMBER> <TARGET_PHONE_NUMBER> <AMOUNT>
+				
+			case "mbway-transfer":
 				controller.transfer(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]), Integer.parseInt(inputs[3]));
-
-			} else if (inputs[0].contentEquals("mbway-split-bill")) {
-				// mbway-split-bill <NUMBER_OF_FRIENDS> <AMOUNT>
-
+				
+			case "mbway-split-bill":
+				
 				int counter = 0;
+				int totalAmount = Integer.parseInt(inputs[2]);
 				HashMap<Integer, Integer> splits = new HashMap<Integer, Integer>();
+				MBWayAccount friend;
+								
 				for (int i = 0; i < Integer.parseInt(inputs[1]); i++) {
-					// friend <PHONE_NUMBER> <AMOUNT>
-
+					// first friend already paid and has money to receive
+					System.out.println("Insert friend: ");
+					input = s.nextLine();
+					inputs = input.split(" ");
+					command = inputs[0];
+					
+					if (!command.equals("friend")) {
+						// send error
+						break;
+					} 
+					
+					friend = MBWayAccount.getMBWayAccount(Integer.parseInt(inputs[1]));
+					if (friend == null) {
+						
+					} else if(!friend.isConfirmed()) {
+					
+					} else if(friend.getBalance() < Integer.parseInt(inputs[2])){
+						
+					} else {
+						counter += Integer.parseInt(inputs[2]);
+						if (counter > totalAmount) {
+							
+						}
+					}
+					
+					
+					
 				}
-			}  
+			}
 		}
 	}
 }

@@ -2,6 +2,8 @@ package pt.ulisboa.tecnico.learnjava.sibs.mbway;
 
 import java.util.HashMap;
 
+import pt.ulisboa.tecnico.learnjava.bank.services.Services;
+
 public class MBWayAccount {
 	private String iban;
 	private int phoneNumber;
@@ -38,10 +40,6 @@ public class MBWayAccount {
 		return this.nConfirmation;
 	}
 	
-	public static MBWayAccount getMBWayAccount(int phoneNumber) {
-		return accounts.get(phoneNumber);
-	}
-	
 	public boolean validateAccount(int confirmationNumber) {
 		if (confirmationNumber == this.nConfirmation) {
 			this.confirmed = true;
@@ -53,6 +51,15 @@ public class MBWayAccount {
 	
 	public boolean isConfirmed() {
 		return this.confirmed;
+	}
+	
+	public int getBalance() {
+		Services service = new Services();
+		return service.getAccountByIban(this.iban).getBalance();
+	}
+	
+	public static MBWayAccount getMBWayAccount(int phoneNumber) {
+		return accounts.get(phoneNumber);
 	}
 	
 }
