@@ -13,64 +13,56 @@ public class MVC {
 		String[] inputs;
 		String command;
 		
-		while (running) {
+		HashMap<Integer, Integer> friends = new HashMap<Integer, Integer>();
+		int friendsCounter = 0;
+		int moneyCounter = 0;
+		
+		while (controller.isRunning()) {
 			
 			System.out.println("Insert command: ");
 			input = s.nextLine();
 			inputs = input.split(" ");
 			command = inputs[0];
-
-			switch (command) {
-			case "exit":
-				running = false;
-				System.out.println("You exit the app.");
-				break; 
+			
+			try {
 				
-			case "associate-mbway":
-				controller.createMBWay(inputs[1], Integer.parseInt(inputs[2]));
-				
-			case "confirm-mbway":
-				controller.confirmAccount(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]));
-				
-			case "mbway-transfer":
-				controller.transfer(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]), Integer.parseInt(inputs[3]));
-				
-			case "mbway-split-bill":
-				
-				int counter = 0;
-				int totalAmount = Integer.parseInt(inputs[2]);
-				HashMap<Integer, Integer> splits = new HashMap<Integer, Integer>();
-				MBWayAccount friend;
-								
-				for (int i = 0; i < Integer.parseInt(inputs[1]); i++) {
-					// first friend already paid and has money to receive
-					System.out.println("Insert friend: ");
-					input = s.nextLine();
-					inputs = input.split(" ");
-					command = inputs[0];
+				switch (command) {
+				case "exit":
+					controller.stopRunnging();
+					break; 
 					
-					if (!command.equals("friend")) {
-						// send error
-						break;
-					} 
+				case "associate-mbway":
+					controller.createMBWay(inputs[1], Integer.parseInt(inputs[2]));
+					break;
 					
-					friend = MBWayAccount.getMBWayAccount(Integer.parseInt(inputs[1]));
-					if (friend == null) {
-						
-					} else if(!friend.isConfirmed()) {
+				case "confirm-mbway":
+					controller.confirmAccount(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]));
+					break;
+				case "mbway-transfer":
+					controller.transfer(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]), Integer.parseInt(inputs[3]));
 					
-					} else if(friend.getBalance() < Integer.parseInt(inputs[2])){
-						
-					} else {
-						counter += Integer.parseInt(inputs[2]);
-						if (counter > totalAmount) {
-							
-						}
+				case "friend":
+					if (controller.accountExists(Integer.parseInt(inputs[1]))) {
+						friends.put(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]));
+						friendsCounter++;
+						moneyCounter += Integer.parseInt(inputs[2]);
 					}
+					break;
 					
+				case "mbway-split-bill":
+					controller.splitBill(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]), friends, friendsCounter, moneyCounter);
+					friendsCounter = 0;
+					moneyCounter = 0;
+					friends.clear();
+					break;
 					
-					
+				default:
+					System.out.println("Command not recognised.");
+					break;
 				}
+				
+			} catch (Exception e) {
+				System.out.println("Please check yout input.");
 			}
 		}
 	}

@@ -25,7 +25,7 @@ public class View {
 	}
 	
 	public void printAccountNotConfirmed(int phoneNumber) {
-		System.out.println("The phone nuumber '" + phoneNumber + "' is not confirmed.");
+		System.out.println("The phone number '" + phoneNumber + "' is not confirmed.");
 	}
 	
 	public void printSuccessfulTransfer() {
@@ -36,5 +36,23 @@ public class View {
 		System.out.println("Not enough money on the source account.");
 	}
 	
+	public void printStopRunning() {
+		System.out.println("You exit the app.");
+	}
 	
+	public void printTooManyFriends() {
+		System.out.println("Oh no! Too many friends.");
+	}
+	
+	public void printNotEnoughFriends() {
+		System.out.println("Oh no! One friend is missing.");
+	}
+	
+	public void printWrongAmount() {
+		System.out.println("Something is wrong. Did you set the bill amount right?");
+	}
+	
+	public void printFriendWithoutMoney() {
+		System.out.println("Oh no! One friend does not have money to pay!");
+	}
 }
