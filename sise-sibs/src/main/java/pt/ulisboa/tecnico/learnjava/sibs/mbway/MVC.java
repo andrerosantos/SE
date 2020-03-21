@@ -24,8 +24,7 @@ public class MVC {
 		String command;
 		
 		HashMap<Integer, Integer> friends = new HashMap<Integer, Integer>();
-		int friendsCounter = 0;
-		int moneyCounter = 0;
+		int receiver = 0;
 		
 		while (controller.isRunning()) {
 			
@@ -53,16 +52,16 @@ public class MVC {
 					
 				case "friend":
 					if (controller.accountExists(Integer.parseInt(inputs[1]))) {
+						if (friends.isEmpty()) {
+							// save the account that will receive the money
+							receiver = Integer.parseInt(inputs[1]);
+						}
 						friends.put(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]));
-						friendsCounter++;
-						moneyCounter += Integer.parseInt(inputs[2]);
 					}
 					break;
 					
 				case "mbway-split-bill":
-					controller.splitBill(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]), friends, friendsCounter, moneyCounter);
-					friendsCounter = 0;
-					moneyCounter = 0;
+					controller.splitBill(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]), friends, receiver);
 					friends.clear();
 					break;
 					

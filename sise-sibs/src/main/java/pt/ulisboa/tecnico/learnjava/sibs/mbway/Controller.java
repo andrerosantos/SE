@@ -53,29 +53,41 @@ public class Controller {
 		}
 	}
 	
-	public void splitBill(int numberOfFriends, int totalAmount, HashMap<Integer, Integer> friends, int friendsCounter, int friendsMoneyCounter) {
-		if (numberOfFriends < friendsCounter) {
-			view.printTooManyFriends();
-		} else if (numberOfFriends > friendsCounter) {
+	public void splitBill(int numberOfFriends, int totalAmount, HashMap<Integer, Integer> friends, int receiver) throws SibsException, AccountException, OperationException {
+		
+		Services service = new Services();
+		int counter = 0;
+		int amount = 0;
+		
+		for (int phoneNumber : friends.keySet()) {
+			counter++;
+			amount += friends.get(phoneNumber);
+			
+			if (counter > numberOfFriends) {
+				view.printTooManyFriends();
+			} else if(friends.get(phoneNumber) > service.getAccountByIban(MBWayAccount.getMBWayAccount(phoneNumber).getIban()).getBalance()
+					&& phoneNumber != receiver) {
+				view.printFriendWithoutMoney();
+				return;
+			}
+		}
+		
+		
+		if (counter < numberOfFriends) {
 			view.printNotEnoughFriends();
-		} else if (totalAmount != friendsMoneyCounter) {
+		} else if (totalAmount != amount) {
 			view.printWrongAmount();
 		}
 		
-		Services service = new Services();
-		for (int key : friends.keySet()) {
-			if(friends.get(key) > service.getAccountByIban(MBWayAccount.getMBWayAccount(key).getIban()).getBalance()) {
-				view.printFriendWithoutMoney();
-			}
-		}
-
-		//ToDo split the bill
-		//ToDo split the bill
-		//ToDo split the bill
-		//ToDo split the bill
-		//ToDo split the bill
-		//ToDo split the bill
+		String receiverIban = MBWayAccount.getMBWayAccount(receiver).getIban();
+		MBWayAccount friendAccount;
 		
+		for (int phoneNumber : friends.keySet()) {
+			if (phoneNumber != receiver) {
+				friendAccount = MBWayAccount.getMBWayAccount(phoneNumber);
+				this.sibs.transfer(friendAccount.getIban(), receiverIban, friends.get(phoneNumber));
+			}
+		}		
 	}
 	
 	public boolean isRunning() {
