@@ -8,6 +8,8 @@ import pt.ulisboa.tecnico.learnjava.bank.domain.Client;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.BankException;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.ClientException;
+import pt.ulisboa.tecnico.learnjava.bank.services.Services;
+import pt.ulisboa.tecnico.learnjava.sibs.domain.Sibs;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.MBWayException;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
@@ -19,13 +21,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.stream.Stream;
 
 import org.junit.After;
 
 public class ControllerClassTest {
-	private int PHONE_NUMBER = 912345678;
+	private int PHONE_NUMBER_1 = 912345678;
+	private int PHONE_NUMBER_2 = 987654321;
+	private int PHONE_NUMBER_3 = 978456123;
+	private int PHONE_NUMBER_4 = 932165487;
 	
+	private Services services = new Services();
+	private Sibs sibs = new Sibs(100, services);
 	private Controller controller;
 	private Bank bpi;
 	private Client client1;
@@ -48,46 +56,78 @@ public class ControllerClassTest {
 		client3 = new Client(bpi, "John", "Smith", "789456123", "321654987", "Street", 25);
 		client4 = new Client(bpi, "Jane", "Smith", "321654987", "789456123", "Street", 25);
 		
-		bpi.createAccount(Bank.AccountType.CHECKING, client1, 1000, 0);
-		bpi.createAccount(Bank.AccountType.CHECKING, client2, 1000, 0);
-		bpi.createAccount(Bank.AccountType.CHECKING, client3, 1000, 0);
-		bpi.createAccount(Bank.AccountType.CHECKING, client4, 1000, 0);
+		iban1 = bpi.createAccount(Bank.AccountType.CHECKING, client1, 1000, 0);
+		iban2 = bpi.createAccount(Bank.AccountType.CHECKING, client2, 1000, 0);
+		iban3 = bpi.createAccount(Bank.AccountType.CHECKING, client3, 1000, 0);
+		iban4 = bpi.createAccount(Bank.AccountType.CHECKING, client4, 1000, 0);
 	}
 	
 	@Test
 	public void createMBWayAccountTest() {
-		controller.createMBWay(iban1, PHONE_NUMBER);
-		MBWayAccount account = MBWayAccount.getMBWayAccount(PHONE_NUMBER);
+		controller.createMBWay(iban1, PHONE_NUMBER_1);
+		MBWayAccount account = MBWayAccount.getMBWayAccount(PHONE_NUMBER_1);
 		assertEquals(iban1, account.getIban());
 	}
 	
 	@Test
 	public void accoutnExistsTest() {
-		MBWayAccount account = MBWayAccount.getMBWayAccount(PHONE_NUMBER);
-		assertTrue(controller.accountExists(PHONE_NUMBER));
+		MBWayAccount account = MBWayAccount.getMBWayAccount(PHONE_NUMBER_1);
+		assertTrue(controller.accountExists(PHONE_NUMBER_1));
 	}
 	
 	@Test
 	public void confirmMBWayAccountTest() throws MBWayException {
-		MBWayAccount account = new MBWayAccount(iban1, PHONE_NUMBER);
+		MBWayAccount account = new MBWayAccount(iban1, PHONE_NUMBER_1);
 		
-		controller.confirmAccount(PHONE_NUMBER, account.getConfirmationCode());
+		controller.confirmAccount(PHONE_NUMBER_1, account.getConfirmationCode());
 		
 		assertTrue(account.isConfirmed());
 	}
 	
 	@Test
 	public void transferMoneyTest() throws MBWayException, SibsException, AccountException, OperationException {
-		MBWayAccount account = new MBWayAccount(iban1, PHONE_NUMBER);
-		MBWayAccount account2 = new MBWayAccount(iban2, 999999999);
+		MBWayAccount account = new MBWayAccount(iban1, PHONE_NUMBER_1);
+		MBWayAccount account2 = new MBWayAccount(iban2, PHONE_NUMBER_2);
 		
-		controller.transfer(PHONE_NUMBER, 999999999, 100);
+		controller.transfer(PHONE_NUMBER_1, 999999999, 100);
+	}
+	
+	@Test
+	public void splitBillSuccess() throws MBWayException, SibsException, AccountException, OperationException {
+		MBWayAccount account = new MBWayAccount(iban1, PHONE_NUMBER_1);
+		MBWayAccount account2 = new MBWayAccount(iban2, PHONE_NUMBER_2);
+		
+		HashMap<Integer, Integer> friends = new HashMap<Integer, Integer>();
+		friends.put(PHONE_NUMBER_1, 500);
+		friends.put(PHONE_NUMBER_2, 500);
+		
+		controller.splitBill(2, 1000, friends, PHONE_NUMBER_1);
+		
+		assertEquals(1500, this.services.getAccountByIban(iban1).getBalance());
+		assertEquals(500, this.services.getAccountByIban(iban2).getBalance());
+	}
+	
+	@Test
+	public void splitBillNotEnoughMoney() throws MBWayException, SibsException, AccountException, OperationException {
+		MBWayAccount account = new MBWayAccount(iban1, PHONE_NUMBER_1);
+		MBWayAccount account2 = new MBWayAccount(iban2, PHONE_NUMBER_2);
+		
+		HashMap<Integer, Integer> friends = new HashMap<Integer, Integer>();
+		friends.put(PHONE_NUMBER_1, 0);
+		friends.put(PHONE_NUMBER_2, 1001);
+		
+		controller.splitBill(2, 1001, friends, PHONE_NUMBER_1);
+		
+		assertEquals(1000, this.services.getAccountByIban(iban1).getBalance());
+		assertEquals(1000, this.services.getAccountByIban(iban2).getBalance());
 	}
 	
 	
 	@After
 	public void tearDown() {
 		controller = null;
+		bpi = null;
 		Bank.clearBanks();
+		MBWayAccount.clearMBWayAccounts();
 	}
 }

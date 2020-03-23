@@ -45,6 +45,8 @@ public class Controller {
 			view.printAccountNotConfirmed(sourcePhoneNumber);
 		} else if (!source.isConfirmed()) {
 			view.printAccountNotConfirmed(targetPhoneNumber);
+		} else if (this.service.getAccountByIban(source.getIban()).getBalance() < amount){
+			view.printNotEnoughMoney();
 		} else {
 			
 			sibs.transfer(source.getIban(), target.getIban(), amount);
@@ -65,13 +67,14 @@ public class Controller {
 			
 			if (counter > numberOfFriends) {
 				view.printTooManyFriends();
+				return;
 			} else if(friends.get(phoneNumber) > service.getAccountByIban(MBWayAccount.getMBWayAccount(phoneNumber).getIban()).getBalance()
 					&& phoneNumber != receiver) {
 				view.printFriendWithoutMoney();
 				return;
 			}
+			
 		}
-		
 		
 		if (counter < numberOfFriends) {
 			view.printNotEnoughFriends();
@@ -87,7 +90,8 @@ public class Controller {
 				friendAccount = MBWayAccount.getMBWayAccount(phoneNumber);
 				this.sibs.transfer(friendAccount.getIban(), receiverIban, friends.get(phoneNumber));
 			}
-		}		
+		}
+		view.printSuccessSplitBill();
 	}
 	
 	public boolean isRunning() {

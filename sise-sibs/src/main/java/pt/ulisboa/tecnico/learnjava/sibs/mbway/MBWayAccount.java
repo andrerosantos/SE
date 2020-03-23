@@ -70,4 +70,8 @@ public class MBWayAccount {
 		return accounts.get(phoneNumber);
 	}
 	
+	public static void clearMBWayAccounts() {
+		accounts.clear();
+	}
+	
 }

@@ -8,9 +8,11 @@ import pt.ulisboa.tecnico.learnjava.bank.domain.Client;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.BankException;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.ClientException;
+import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
+import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
 
 public class MVC {
-	public static void main(String[] args) throws BankException, ClientException, AccountException {
+	public static void main(String[] args) throws BankException, ClientException, AccountException, NumberFormatException, SibsException, OperationException {
 		
 		// Use 'BPICK1', 'BPICK2', 'BPICK3' and 'BPICK4' as IBAN values
 		accountsCreation();
@@ -70,10 +72,10 @@ public class MVC {
 					break;
 				}
 				
-			} catch (Exception e) {
-				System.out.println(e.getMessage());
+			} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
 				System.out.println("Please check yout input.");
 			}
+			
 		}
 	}
 	

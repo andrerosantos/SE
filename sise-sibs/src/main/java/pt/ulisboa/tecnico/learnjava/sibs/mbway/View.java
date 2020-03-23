@@ -59,4 +59,8 @@ public class View {
 	public void printException(String message) {
 		System.out.println(message);
 	}
+	
+	public void printSuccessSplitBill() {
+		System.out.println("Bill payed successfully!");
+	}
 }
