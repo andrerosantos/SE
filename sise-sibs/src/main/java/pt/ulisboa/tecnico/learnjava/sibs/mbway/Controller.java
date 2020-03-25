@@ -27,71 +27,50 @@ public class Controller {
 	}
 	
 	public void confirmAccount(int phoneNumber, int confirmationCode) {
-		MBWayAccount account = MBWayAccount.getMBWayAccount(phoneNumber);
-		if (account.validateAccount(confirmationCode)) {
-			view.printConfirmationResult(true);
-		} else {
-			view.printConfirmationResult(false);
+		try {
+			MBWayAccount account = MBWayAccount.getMBWayAccount(phoneNumber);
+			
+			if (account.validateAccount(confirmationCode)) {
+				view.printConfirmationResult(true);
+			} else {
+				view.printConfirmationResult(false);
+			}
+			
+		} catch (Exception e) {
+			view.printException(e.getMessage());
 		}
 	}
 	
-	public void transfer(int sourcePhoneNumber, int targetPhoneNumber, int amount) throws SibsException, AccountException, OperationException {
-		MBWayAccount source = MBWayAccount.getMBWayAccount(sourcePhoneNumber);
-		MBWayAccount target = MBWayAccount.getMBWayAccount(targetPhoneNumber);
-		
-		if(source == null || target == null) {
-			view.printNoSuchAccounts();
-		} else if (!source.isConfirmed()) {
-			view.printAccountNotConfirmed(sourcePhoneNumber);
-		} else if (!source.isConfirmed()) {
-			view.printAccountNotConfirmed(targetPhoneNumber);
-		} else if (this.service.getAccountByIban(source.getIban()).getBalance() < amount){
-			view.printNotEnoughMoney();
-		} else {
+	public void transfer(int sourcePhoneNumber, int targetPhoneNumber, int amount) {
+		try {
+			MBWayAccount source = MBWayAccount.getMBWayAccount(sourcePhoneNumber);
+			MBWayAccount target = MBWayAccount.getMBWayAccount(targetPhoneNumber);
 			
-			sibs.transfer(source.getIban(), target.getIban(), amount);
-			view.printSuccessfulTransfer();
+			source.transferMoney(target, amount);
 			
+		} catch (Exception e) {
+			view.printException(e.getMessage());
 		}
 	}
 	
 	public void splitBill(int numberOfFriends, int totalAmount, HashMap<Integer, Integer> friends, int receiver) throws SibsException, AccountException, OperationException {
-		
 		Services service = new Services();
 		int counter = 0;
 		int amount = 0;
 		
-		for (int phoneNumber : friends.keySet()) {
-			counter++;
-			amount += friends.get(phoneNumber);
-			
-			if (counter > numberOfFriends) {
-				view.printTooManyFriends();
-				return;
-			} else if(friends.get(phoneNumber) > service.getAccountByIban(MBWayAccount.getMBWayAccount(phoneNumber).getIban()).getBalance()
-					&& phoneNumber != receiver) {
-				view.printFriendWithoutMoney();
-				return;
-			}
-			
-		}
-		
-		if (counter < numberOfFriends) {
+		if (friends.size() > numberOfFriends) {
 			view.printNotEnoughFriends();
-		} else if (totalAmount != amount) {
-			view.printWrongAmount();
-		}
-		
-		String receiverIban = MBWayAccount.getMBWayAccount(receiver).getIban();
-		MBWayAccount friendAccount;
-		
-		for (int phoneNumber : friends.keySet()) {
-			if (phoneNumber != receiver) {
-				friendAccount = MBWayAccount.getMBWayAccount(phoneNumber);
-				this.sibs.transfer(friendAccount.getIban(), receiverIban, friends.get(phoneNumber));
+		} else if (friends.size() < numberOfFriends) {
+			view.printTooManyFriends();
+		} else {
+			try {
+				MBWayAccount receiverAcc = MBWayAccount.getMBWayAccount(receiver);
+				receiverAcc.splitBill(friends, totalAmount);
+				view.printSuccessSplitBill();
+			} catch (Exception e) {
+				view.printException(e.getMessage());
 			}
 		}
-		view.printSuccessSplitBill();
 	}
 	
 	public boolean isRunning() {
@@ -104,10 +83,11 @@ public class Controller {
 	}
 	
 	public boolean accountExists(int phoneNumber) {
-		if (MBWayAccount.getMBWayAccount(phoneNumber) == null) {
-			view.printNoSuchAccounts(); 
+		try {
+			MBWayAccount.getMBWayAccount(phoneNumber);
 			return true;
+		} catch (Exception e) {
+			return false;
 		}
-		return (true);
 	}
 }

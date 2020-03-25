@@ -63,15 +63,15 @@ public class ControllerClassTest {
 	}
 	
 	@Test
-	public void createMBWayAccountTest() {
+	public void createMBWayAccountTest() throws MBWayException {
 		controller.createMBWay(iban1, PHONE_NUMBER_1);
 		MBWayAccount account = MBWayAccount.getMBWayAccount(PHONE_NUMBER_1);
 		assertEquals(iban1, account.getIban());
 	}
 	
 	@Test
-	public void accoutnExistsTest() {
-		MBWayAccount account = MBWayAccount.getMBWayAccount(PHONE_NUMBER_1);
+	public void accountExistsTest() throws MBWayException {
+		MBWayAccount account = new MBWayAccount(iban1, PHONE_NUMBER_1);
 		assertTrue(controller.accountExists(PHONE_NUMBER_1));
 	}
 	
