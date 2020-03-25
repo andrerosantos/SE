@@ -36,24 +36,26 @@ public class TransferOperation extends Operation {
 	public void process() throws AccountException, OperationException {
 		if (this.state == Registered.instance()) {
 
-			this.services.withdraw(sourceIban, getValue());
+			this.services.withdraw(this.sourceIban, getValue());
 			this.state = Withdrawn.instance();
-			
-		} else if (this.state == Withdrawn.instance() && sourceIban.substring(0, 3).contentEquals(targetIban.substring(0, 3))){
+
+		} else if (this.state == Withdrawn.instance()
+				&& this.sourceIban.substring(0, 3).contentEquals(this.targetIban.substring(0, 3))) {
 			// same bank: deposit and complete
-			this.services.deposit(targetIban, getValue());
+			this.services.deposit(this.targetIban, getValue());
 			this.state = Completed.instance();
-			
-		} else if (this.state == Withdrawn.instance() && !sourceIban.substring(0, 3).contentEquals(targetIban.substring(0, 3))) {
-			//deposit money on target account
-			this.services.deposit(targetIban, getValue());
+
+		} else if (this.state == Withdrawn.instance()
+				&& !this.sourceIban.substring(0, 3).contentEquals(this.targetIban.substring(0, 3))) {
+			// deposit money on target account
+			this.services.deposit(this.targetIban, getValue());
 			this.state = Deposited.instance();
-			
+
 		} else if (this.state == Deposited.instance()) {
-			//charge fee
-			this.services.withdraw(sourceIban, this.commission());
+			// charge fee
+			this.services.withdraw(this.sourceIban, this.commission());
 			this.state = Completed.instance();
-			
+
 		} else {
 			throw new OperationException("Cannot process a canceled operration.");
 		}
@@ -65,21 +67,21 @@ public class TransferOperation extends Operation {
 
 	public void cancel() throws OperationException, AccountException {
 		if (this.state == Withdrawn.instance()) {
-			this.services.deposit(sourceIban, getValue());
+			this.services.deposit(this.sourceIban, getValue());
 			this.state = Canceled.instance();
-			
+
 		} else if (this.state == Deposited.instance()) {
-			this.services.withdraw(targetIban, getValue());
-			this.services.deposit(sourceIban, getValue());
+			this.services.withdraw(this.targetIban, getValue());
+			this.services.deposit(this.sourceIban, getValue());
 			this.state = Canceled.instance();
-			
+
 		} else if (this.state == Registered.instance()) {
 			this.state = Canceled.instance();
-			
+
 		} else {
 			throw new OperationException("Cannot cancel a completed operation.");
 		}
-		
+
 	}
 
 	@Override
