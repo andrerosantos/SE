@@ -1,5 +1,6 @@
 package pt.ulisboa.tecnico.learnjava.sibs.domain;
 
+import pt.ulisboa.tecnico.learnjava.bank.services.Services;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 
 public abstract class Operation {
@@ -36,5 +37,7 @@ public abstract class Operation {
 	public int getValue() {
 		return this.value;
 	}
+
+	protected abstract String Process(Services services); // gerado
 
 }

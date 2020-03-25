@@ -35,7 +35,9 @@ public class Sibs {
 
 		this.services.withdraw(sourceIban, amountToWithdraw);
 
-	}
+		Operation operation = new TransferOperation(targetIban, targetIban, amountToWithdraw); // ia comecar aqui mas
+																								// nem sei se em termo
+																								// de sintaxe e corre	}
 
 	public int addOperation(String type, String sourceIban, String targetIban, int value)
 			throws OperationException, SibsException {
