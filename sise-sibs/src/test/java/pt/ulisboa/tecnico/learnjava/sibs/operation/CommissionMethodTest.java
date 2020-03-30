@@ -1,9 +1,12 @@
 package pt.ulisboa.tecnico.learnjava.sibs.operation;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 import org.junit.Test;
+import org.junit.Before;
 
+import pt.ulisboa.tecnico.learnjava.bank.services.Services;
 import pt.ulisboa.tecnico.learnjava.sibs.domain.Operation;
 import pt.ulisboa.tecnico.learnjava.sibs.domain.PaymentOperation;
 import pt.ulisboa.tecnico.learnjava.sibs.domain.TransferOperation;
@@ -12,24 +15,31 @@ import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 public class CommissionMethodTest {
 	private static final String SOURCE_IBAN = "SourceIban";
 	private static final String TARGET_IBAN = "TargetIban";
-
+	
+	private Services mockServices;
+	
+	@Before
+	public void setUp() {
+		this.mockServices = mock(Services.class);
+	}
+	
 	@Test
 	public void transferOperation1000() throws OperationException {
-		Operation operation = new TransferOperation(SOURCE_IBAN, TARGET_IBAN, 1000);
+		Operation operation = new TransferOperation(SOURCE_IBAN, TARGET_IBAN, 1000, this.mockServices);
 
 		assertEquals(51, operation.commission());
 	}
 
 	@Test
 	public void transferOperation15() throws OperationException {
-		Operation operation = new TransferOperation(SOURCE_IBAN, TARGET_IBAN, 15);
+		Operation operation = new TransferOperation(SOURCE_IBAN, TARGET_IBAN, 15, this.mockServices);
 
 		assertEquals(2, operation.commission());
 	}
 
 	@Test
 	public void transferOperation1() throws OperationException {
-		Operation operation = new TransferOperation(SOURCE_IBAN, TARGET_IBAN, 1);
+		Operation operation = new TransferOperation(SOURCE_IBAN, TARGET_IBAN, 1, this.mockServices);
 
 		assertEquals(1, operation.commission());
 	}

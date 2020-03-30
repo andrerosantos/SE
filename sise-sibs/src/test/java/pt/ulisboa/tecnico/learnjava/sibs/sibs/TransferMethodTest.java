@@ -48,6 +48,10 @@ public class TransferMethodTest {
 
 		this.sibs.transfer(sourceIban, targetIban, 100);
 
+		this.sibs.processOperations();
+		this.sibs.processOperations();
+		this.sibs.processOperations();
+
 		assertEquals(894, this.services.getAccountByIban(sourceIban).getBalance());
 		assertEquals(1100, this.services.getAccountByIban(targetIban).getBalance());
 		assertEquals(1, this.sibs.getNumberOfOperations());

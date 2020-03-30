@@ -52,7 +52,7 @@ public class TransferOperationConstructorMethodTest {
 
 	@Test
 	public void success() throws OperationException {
-		TransferOperation operation = new TransferOperation(this.sourceIban, this.targetIban, VALUE);
+		TransferOperation operation = new TransferOperation(this.sourceIban, this.targetIban, VALUE, this.services);
 
 		assertEquals(Operation.OPERATION_TRANSFER, operation.getType());
 		assertEquals(100, operation.getValue());
@@ -62,32 +62,32 @@ public class TransferOperationConstructorMethodTest {
 
 	@Test(expected = OperationException.class)
 	public void nonPositiveValue() throws OperationException {
-		new TransferOperation(this.sourceIban, this.targetIban, 0);
+		new TransferOperation(this.sourceIban, this.targetIban, 0, this.services);
 	}
 
 	@Test(expected = OperationException.class)
 	public void nullSourceIban() throws OperationException {
-		new TransferOperation(null, this.targetIban, 100);
+		new TransferOperation(null, this.targetIban, 100, this.services);
 	}
 
 	@Test(expected = OperationException.class)
 	public void emptySourceIban() throws OperationException {
-		new TransferOperation("", this.targetIban, 100);
+		new TransferOperation("", this.targetIban, 100, this.services);
 	}
 
 	@Test(expected = OperationException.class)
 	public void nullTargetIban() throws OperationException {
-		new TransferOperation(this.sourceIban, null, 100);
+		new TransferOperation(this.sourceIban, null, 100, this.services);
 	}
 
 	@Test(expected = OperationException.class)
 	public void emptyTargetIban() throws OperationException {
-		new TransferOperation(this.sourceIban, "", 100);
+		new TransferOperation(this.sourceIban, "", 100, this.services);
 	}
 
 	@Test
 	public void testRegistered() throws OperationException {
-		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
+		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100, this.services);
 		assertEquals(Registered.instance(), op.getState());
 		assertEquals(1000, this.services.getAccountByIban(sourceIban).getBalance());
 		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
@@ -95,7 +95,7 @@ public class TransferOperationConstructorMethodTest {
 
 	@Test
 	public void testWithdrawn() throws OperationException, AccountException {
-		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
+		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100, this.services);
 
 		op.process();
 
@@ -109,7 +109,7 @@ public class TransferOperationConstructorMethodTest {
 		Client newClient = new Client(sourceBank, firstName, lastName, "111111111", phoneNumber, address, age);
 		String targetWithSourceBank = sourceBank.createAccount(Bank.AccountType.CHECKING, newClient, 1000, 0);
 		
-		TransferOperation op = new TransferOperation(this.sourceIban, targetWithSourceBank, 100);
+		TransferOperation op = new TransferOperation(this.sourceIban, targetWithSourceBank, 100,this.services);
 
 		op.process();
 		op.process();
@@ -121,7 +121,7 @@ public class TransferOperationConstructorMethodTest {
 
 	@Test
 	public void testDeposit() throws OperationException, AccountException {
-		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
+		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100, this.services);
 
 		op.process();
 		op.process();
@@ -133,7 +133,7 @@ public class TransferOperationConstructorMethodTest {
 
 	@Test
 	public void testCompletedWithFee() throws OperationException, AccountException {
-		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
+		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100, this.services);
 
 		op.process();
 		op.process();
@@ -146,7 +146,7 @@ public class TransferOperationConstructorMethodTest {
 
 	@Test
 	public void testCancelRegisteredOperation() throws OperationException, AccountException {
-		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
+		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100, this.services);
 
 		op.cancel();
 
@@ -155,7 +155,7 @@ public class TransferOperationConstructorMethodTest {
 	
 	@Test
 	public void testCancelWithdrawnOperation() throws OperationException, AccountException {
-		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
+		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100, this.services);
 
 		op.process();
 
@@ -169,7 +169,7 @@ public class TransferOperationConstructorMethodTest {
 	
 	@Test
 	public void testCancelDepositedOperation() throws OperationException, AccountException {
-		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100);
+		TransferOperation op = new TransferOperation(this.sourceIban, this.targetIban, 100, this.services);
 
 		op.process();
 		op.process();
@@ -183,7 +183,7 @@ public class TransferOperationConstructorMethodTest {
 
 	@Test(expected=OperationException.class)
 	public void processCanceledOperation() throws OperationException, AccountException {
-		TransferOperation op = new TransferOperation(this.sourceIban,this.targetIban, 100);
+		TransferOperation op = new TransferOperation(this.sourceIban,this.targetIban, 100, this.services);
 		
 		op.cancel();
 		op.process();
@@ -191,7 +191,7 @@ public class TransferOperationConstructorMethodTest {
 	
 	@Test
 	public void testCancelFail() throws OperationException, AccountException {
-		TransferOperation op = new TransferOperation(this.sourceIban,this.targetIban, 100);
+		TransferOperation op = new TransferOperation(this.sourceIban,this.targetIban, 100, this.services);
 		
 		op.process();
 		op.process();

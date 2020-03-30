@@ -46,8 +46,13 @@ public class TransferMethodMockTest {
 
 		this.sibs.transfer(this.sourceIban, this.targetIban, 100);
 
-		verify(this.mockServices).withdraw(this.sourceIban, 106);
+		this.sibs.processOperations();
+		this.sibs.processOperations();
+		this.sibs.processOperations();
+
+		verify(this.mockServices).withdraw(this.sourceIban, 100);
 		verify(this.mockServices).deposit(this.targetIban, 100);
+		verify(this.mockServices).withdraw(this.sourceIban, 6);
 
 		assertEquals(1, this.sibs.getNumberOfOperations());
 		assertEquals(100, this.sibs.getTotalValueOfOperations());
@@ -67,6 +72,9 @@ public class TransferMethodMockTest {
 
 		this.sibs.transfer(this.sourceIban, this.targetIban, 100);
 
+		this.sibs.processOperations();
+		this.sibs.processOperations();
+		
 		verify(this.mockServices).withdraw(this.sourceIban, 100);
 		verify(this.mockServices).deposit(this.targetIban, 100);
 

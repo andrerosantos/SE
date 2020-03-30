@@ -1,13 +1,16 @@
 package pt.ulisboa.tecnico.learnjava.sibs.sibs;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.bank.services.Services;
 import pt.ulisboa.tecnico.learnjava.sibs.domain.Operation;
+import pt.ulisboa.tecnico.learnjava.sibs.domain.PaymentOperation;
 import pt.ulisboa.tecnico.learnjava.sibs.domain.Sibs;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
@@ -18,15 +21,20 @@ public class AddOperationMethodTest {
 	private static final int VALUE = 100;
 
 	private Sibs sibs;
+	private Services mockServices;
 
 	@Before
 	public void setUp() {
-		this.sibs = new Sibs(3, new Services());
+		this.mockServices = mock(Services.class);
+		this.sibs = new Sibs(3, mockServices);
 	}
 
 	@Test
-	public void success() throws OperationException, SibsException {
-		int position = this.sibs.addOperation(Operation.OPERATION_TRANSFER, SOURCE_IBAN, TARGET_IBAN, VALUE);
+	public void success() throws OperationException, SibsException, AccountException {
+		when(this.mockServices.accountExists(SOURCE_IBAN)).thenReturn(true);
+		when(this.mockServices.accountExists(TARGET_IBAN)).thenReturn(true);
+		
+		int position = this.sibs.transfer(SOURCE_IBAN, TARGET_IBAN, VALUE);
 
 		Operation operation = this.sibs.getOperation(position);
 
@@ -36,12 +44,16 @@ public class AddOperationMethodTest {
 	}
 
 	@Test
-	public void successWithDelete() throws OperationException, SibsException {
-		int position = this.sibs.addOperation(Operation.OPERATION_TRANSFER, SOURCE_IBAN, TARGET_IBAN, VALUE);
-		this.sibs.addOperation(Operation.OPERATION_TRANSFER, SOURCE_IBAN, TARGET_IBAN, VALUE);
-		this.sibs.addOperation(Operation.OPERATION_TRANSFER, SOURCE_IBAN, TARGET_IBAN, VALUE);
+	public void successWithDelete() throws OperationException, SibsException, AccountException {
+		when(this.mockServices.accountExists(SOURCE_IBAN)).thenReturn(true);
+		when(this.mockServices.accountExists(TARGET_IBAN)).thenReturn(true);
+		
+		int position = this.sibs.transfer(SOURCE_IBAN, TARGET_IBAN, VALUE);
+		this.sibs.transfer(SOURCE_IBAN, TARGET_IBAN, VALUE);
+		this.sibs.transfer(SOURCE_IBAN, TARGET_IBAN, VALUE);
 		this.sibs.removeOperation(position);
-		position = this.sibs.addOperation(Operation.OPERATION_PAYMENT, null, TARGET_IBAN, 200);
+		
+		position = this.sibs.addOperation(new PaymentOperation(TARGET_IBAN, 200));
 
 		Operation operation = this.sibs.getOperation(position);
 
@@ -51,11 +63,14 @@ public class AddOperationMethodTest {
 	}
 
 	@Test(expected = SibsException.class)
-	public void failIsFull() throws OperationException, SibsException {
-		this.sibs.addOperation(Operation.OPERATION_TRANSFER, SOURCE_IBAN, TARGET_IBAN, VALUE);
-		this.sibs.addOperation(Operation.OPERATION_TRANSFER, SOURCE_IBAN, TARGET_IBAN, VALUE);
-		this.sibs.addOperation(Operation.OPERATION_TRANSFER, SOURCE_IBAN, TARGET_IBAN, VALUE);
-		this.sibs.addOperation(Operation.OPERATION_TRANSFER, SOURCE_IBAN, TARGET_IBAN, VALUE);
+	public void failIsFull() throws OperationException, SibsException, AccountException {
+		when(this.mockServices.accountExists(SOURCE_IBAN)).thenReturn(true);
+		when(this.mockServices.accountExists(TARGET_IBAN)).thenReturn(true);
+		
+		this.sibs.transfer(SOURCE_IBAN, TARGET_IBAN, VALUE);
+		this.sibs.transfer(SOURCE_IBAN, TARGET_IBAN, VALUE);
+		this.sibs.transfer(SOURCE_IBAN, TARGET_IBAN, VALUE);
+		this.sibs.transfer(SOURCE_IBAN, TARGET_IBAN, VALUE);
 	}
 
 	@After

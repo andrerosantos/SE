@@ -1,7 +1,8 @@
 package pt.ulisboa.tecnico.learnjava.sibs.domain;
 
-import pt.ulisboa.tecnico.learnjava.bank.services.Services;
+import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
+import pt.ulisboa.tecnico.learnjava.sibs.states.State;
 
 public abstract class Operation {
 	public static final String OPERATION_TRANSFER = "transfer";
@@ -9,6 +10,7 @@ public abstract class Operation {
 
 	private final String type;
 	private final int value;
+	private State state;
 
 	public Operation(String type, int value) throws OperationException {
 		checkParameters(type, value);
@@ -37,7 +39,17 @@ public abstract class Operation {
 	public int getValue() {
 		return this.value;
 	}
-
-	protected abstract String Process(Services services); // gerado
+	
+	public State getState() {
+		return state;
+	}
+	
+	public void setState(State state) {
+		this.state = state;
+	}
+	
+	public void process() { }
+	
+	public void cancel() throws OperationException, AccountException { }
 
 }

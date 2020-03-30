@@ -12,10 +12,13 @@ import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
 public class Controller {
 	private View view = new View();
 	private boolean running = true;
-	private Services service = new Services();
-	private Sibs sibs = new Sibs(100, service);
+	private Services services;
+	private Sibs sibs;
 	
-	public Controller() { }
+	public Controller(Services services) { 
+		this.services = services;
+		this.sibs = new Sibs(100, this.services);
+	}
 
 	public void createMBWay(String iban, int phoneNumber)  {
 		try {

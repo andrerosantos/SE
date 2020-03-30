@@ -1,13 +1,16 @@
 package pt.ulisboa.tecnico.learnjava.sibs.sibs;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.bank.services.Services;
 import pt.ulisboa.tecnico.learnjava.sibs.domain.Operation;
+import pt.ulisboa.tecnico.learnjava.sibs.domain.PaymentOperation;
 import pt.ulisboa.tecnico.learnjava.sibs.domain.Sibs;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
@@ -17,16 +20,22 @@ public class GetTotalValueOfOperationsForTypeMethodTest {
 	private static final String TARGET_IBAN = "TargetIban";
 
 	private Sibs sibs;
+	private Services mockServices;
 
 	@Before
-	public void setUp() throws OperationException, SibsException {
-		this.sibs = new Sibs(3, new Services());
-		this.sibs.addOperation(Operation.OPERATION_PAYMENT, null, TARGET_IBAN, 100);
-		this.sibs.addOperation(Operation.OPERATION_TRANSFER, SOURCE_IBAN, TARGET_IBAN, 200);
+	public void setUp() throws OperationException, SibsException, AccountException {
+		this.mockServices = mock(Services.class);
+		this.sibs = new Sibs(3, this.mockServices);
 	}
 
 	@Test
-	public void successTwo() throws SibsException, OperationException {
+	public void successTwo() throws SibsException, OperationException, AccountException {
+		when(this.mockServices.accountExists(SOURCE_IBAN)).thenReturn(true);
+		when(this.mockServices.accountExists(TARGET_IBAN)).thenReturn(true);
+		
+		this.sibs.addOperation(new PaymentOperation(TARGET_IBAN, 100));
+		this.sibs.transfer(SOURCE_IBAN, TARGET_IBAN, 200);
+		
 		assertEquals(100, this.sibs.getTotalValueOfOperationsForType(Operation.OPERATION_PAYMENT));
 	}
 

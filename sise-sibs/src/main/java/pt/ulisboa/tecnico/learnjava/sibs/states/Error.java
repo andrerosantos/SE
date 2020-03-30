@@ -4,10 +4,10 @@ import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.bank.services.Services;
 import pt.ulisboa.tecnico.learnjava.sibs.domain.Operation;
 
-public class Canceled implements State{
-	private static Canceled instance = new Canceled();
+public class Error implements State {
+private static Error instance = new Error();
 	
-	private Canceled() {
+	private Error() {
 		super();
 	}
 	
@@ -17,11 +17,13 @@ public class Canceled implements State{
 
 	@Override
 	public void process(Operation operation, Services services) {
-		// Do nothing	
+		// Do nothing - no operation recovers from error
 	}
-	
+
 	@Override
 	public void cancel(Operation operation, Services services) throws AccountException {
-		// Do nothing	
+		// Do nothing - no operation can be canceled after entering this state
+		
 	}
+
 }

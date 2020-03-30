@@ -6,6 +6,7 @@ import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 import pt.ulisboa.tecnico.learnjava.sibs.states.Canceled;
 import pt.ulisboa.tecnico.learnjava.sibs.states.Completed;
 import pt.ulisboa.tecnico.learnjava.sibs.states.Deposited;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Error;
 import pt.ulisboa.tecnico.learnjava.sibs.states.Registered;
 import pt.ulisboa.tecnico.learnjava.sibs.states.State;
 import pt.ulisboa.tecnico.learnjava.sibs.states.Withdrawn;
@@ -14,9 +15,10 @@ public class TransferOperation extends Operation {
 	private final String sourceIban;
 	private final String targetIban;
 	private State state;
-	private final Services services; // can I make this static? - no need to have multiple services occupying memory
+	private final Services services;
+	private int fails;
 
-	public TransferOperation(String sourceIban, String targetIban, int value) throws OperationException {
+	public TransferOperation(String sourceIban, String targetIban, int value, Services services) throws OperationException {
 		super(Operation.OPERATION_TRANSFER, value);
 
 		if (invalidString(sourceIban) || invalidString(targetIban)) {
@@ -26,62 +28,32 @@ public class TransferOperation extends Operation {
 		this.sourceIban = sourceIban;
 		this.targetIban = targetIban;
 		this.state = Registered.instance();
-		this.services = new Services();
+		this.services = services;
+		this.fails = 0;
 	}
 
 	private boolean invalidString(String name) {
 		return name == null || name.length() == 0;
 	}
 
-	public void process() throws AccountException, OperationException {
-		if (this.state == Registered.instance()) {
-
-			this.services.withdraw(this.sourceIban, getValue());
-			this.state = Withdrawn.instance();
-
-		} else if (this.state == Withdrawn.instance()
-				&& this.sourceIban.substring(0, 3).contentEquals(this.targetIban.substring(0, 3))) {
-			// same bank: deposit and complete
-			this.services.deposit(this.targetIban, getValue());
-			this.state = Completed.instance();
-
-		} else if (this.state == Withdrawn.instance()
-				&& !this.sourceIban.substring(0, 3).contentEquals(this.targetIban.substring(0, 3))) {
-			// deposit money on target account
-			this.services.deposit(this.targetIban, getValue());
-			this.state = Deposited.instance();
-
-		} else if (this.state == Deposited.instance()) {
-			// charge fee
-			this.services.withdraw(this.sourceIban, this.commission());
-			this.state = Completed.instance();
-
-		} else {
-			throw new OperationException("Cannot process a canceled operration.");
-		}
+	@Override
+	public void process() {
+		this.state.process(this, this.services);
 	}
 
+	@Override
 	public State getState() {
 		return this.state;
 	}
+	
+	@Override
+	public void setState(State state) {
+		this.state = state;
+	}
 
+	@Override
 	public void cancel() throws OperationException, AccountException {
-		if (this.state == Withdrawn.instance()) {
-			this.services.deposit(this.sourceIban, getValue());
-			this.state = Canceled.instance();
-
-		} else if (this.state == Deposited.instance()) {
-			this.services.withdraw(this.targetIban, getValue());
-			this.services.deposit(this.sourceIban, getValue());
-			this.state = Canceled.instance();
-
-		} else if (this.state == Registered.instance()) {
-			this.state = Canceled.instance();
-
-		} else {
-			throw new OperationException("Cannot cancel a completed operation.");
-		}
-
+		this.state.cancel(this, this.services);
 	}
 
 	@Override
@@ -100,4 +72,5 @@ public class TransferOperation extends Operation {
 		return this.targetIban;
 	}
 
+	
 }

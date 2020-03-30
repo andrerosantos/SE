@@ -37,10 +37,15 @@ public class TransferFailMockTest {
 		doThrow(new AccountException()).when(this.mockServices).deposit(targetIban, 100);
 
 		when(this.mockServices.accountExists(sourceIban)).thenReturn(true);
-		when(this.mockServices.accountExists(targetIban)).thenReturn(true);
+		when(this.mockServices.accountExists(targetIban)).thenReturn(false);
 
 		try {
 			this.sibs.transfer(sourceIban, targetIban, 100);
+
+			this.sibs.processOperations();
+			this.sibs.processOperations();
+			this.sibs.processOperations();
+			
 			fail();
 		} catch (SibsException e) {
 			verify(this.mockServices, Mockito.times(0)).withdraw(sourceIban, 106);
