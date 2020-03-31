@@ -106,4 +106,8 @@ public class Sibs {
 		((TransferOperation) operations[transferID]).cancel();
 	}
 	
+	public Services getServices() {
+		return this.services;
+	}
+	
 }

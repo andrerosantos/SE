@@ -15,8 +15,8 @@ public class Controller {
 	private Services services;
 	private Sibs sibs;
 	
-	public Controller(Services services) { 
-		this.services = services;
+	public Controller() { 
+		this.services = new Services();
 		this.sibs = new Sibs(100, this.services);
 	}
 

@@ -16,8 +16,8 @@ public class MBWayAccount {
 	private int nConfirmation;
 	private boolean confirmed = false;
 	
-	private Services services = new Services();
-	private Sibs sibs = new Sibs(100, services);
+	private Services services;
+	private Sibs sibs;
 	
 	private static HashMap<Integer, MBWayAccount> accounts = new HashMap<Integer, MBWayAccount>();
 	
@@ -33,6 +33,8 @@ public class MBWayAccount {
 		this.iban = iban;
 		this.phoneNumber = phoneNumber;
 		this.nConfirmation = (int) (Math.random() * 100000);
+		this.services = new Services();
+		this.sibs = new Sibs(100, this.services);
 		
 		accounts.put(phoneNumber, this);
 	}

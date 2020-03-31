@@ -181,12 +181,14 @@ public class TransferOperationConstructorMethodTest {
 		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
 	}
 
-	@Test(expected=OperationException.class)
+	@Test
 	public void processCanceledOperation() throws OperationException, AccountException {
 		TransferOperation op = new TransferOperation(this.sourceIban,this.targetIban, 100, this.services);
 		
 		op.cancel();
 		op.process();
+		
+		assertEquals(Canceled.instance(), op.getState());
 	}
 	
 	@Test

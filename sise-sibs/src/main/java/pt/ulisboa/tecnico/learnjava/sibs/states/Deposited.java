@@ -40,6 +40,7 @@ public class Deposited implements State{
 			services.withdraw(targetIban, operation.getValue());
 			services.deposit(sourceIban, operation.getValue());
 			
+			operation.setState(Canceled.instance());
 		}
 	}
 }

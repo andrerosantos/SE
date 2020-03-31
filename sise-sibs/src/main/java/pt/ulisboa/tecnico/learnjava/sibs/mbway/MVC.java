@@ -9,6 +9,7 @@ import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.BankException;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.ClientException;
 import pt.ulisboa.tecnico.learnjava.bank.services.Services;
+import pt.ulisboa.tecnico.learnjava.sibs.domain.Sibs;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
 
@@ -24,8 +25,7 @@ public class MVC {
 		String[] inputs;
 		String command;
 		
-		Services services = new Services();
-		Controller controller = new Controller(services);
+		Controller controller = new Controller();
 		
 		HashMap<Integer, Integer> friends = new HashMap<Integer, Integer>();
 		int receiver = 0;

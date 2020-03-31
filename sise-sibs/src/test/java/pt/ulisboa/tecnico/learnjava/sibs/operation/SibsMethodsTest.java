@@ -40,15 +40,15 @@ public class SibsMethodsTest {
 	
 	@Before
 	public void setUp() throws BankException, ClientException, AccountException {
+		this.services = new Services();
 		this.sibs = new Sibs(10, services);
 		
-		this.services = new Services();
 		this.sourceBank = new Bank("CGD");
 		this.targetBank = new Bank("BPI");
 		this.sourceClient = new Client(sourceBank, firstName, lastName, nif, phoneNumber, address, age);
 		this.targetClient = new Client(targetBank, firstName, lastName, nif, phoneNumber, address, age);
-		this.sourceIban = sourceBank.createAccount(Bank.AccountType.CHECKING, sourceClient, 1000, 0);
-		this.targetIban = targetBank.createAccount(Bank.AccountType.CHECKING, targetClient, 1000, 0);
+		this.sourceIban = this.sourceBank.createAccount(Bank.AccountType.CHECKING, this.sourceClient, 1000, 0);
+		this.targetIban = this.targetBank.createAccount(Bank.AccountType.CHECKING, this.targetClient, 1000, 0);
 	}
 	
 	@Test
@@ -61,7 +61,7 @@ public class SibsMethodsTest {
 	
 	@Test
 	public void completeTransfer() throws SibsException, AccountException, OperationException {
-		int id = this.sibs.transfer(sourceIban, targetIban, 100);
+		int id = this.sibs.transfer(this.sourceIban, this.targetIban, 100);
 		
 		TransferOperation transfer = (TransferOperation) this.sibs.getOperation(id);
 		
@@ -69,14 +69,14 @@ public class SibsMethodsTest {
 		transfer.process();
 		transfer.process();
 		
-		assertEquals(894, this.services.getAccountByIban(sourceIban).getBalance());
-		assertEquals(1100, this.services.getAccountByIban(targetIban).getBalance());
+		assertEquals(894, this.services.getAccountByIban(this.sourceIban).getBalance());
+		assertEquals(1100, this.services.getAccountByIban(this.targetIban).getBalance());
 		assertEquals(Completed.instance(), transfer.getState());
 	}
 	
 	@Test
 	public void processOperationsTest() throws SibsException, AccountException, OperationException {
-		int id = this.sibs.transfer(sourceIban, targetIban, 100);
+		int id = this.sibs.transfer(this.sourceIban, this.targetIban, 100);
 		
 		TransferOperation transfer = (TransferOperation) this.sibs.getOperation(id);
 		
@@ -84,14 +84,14 @@ public class SibsMethodsTest {
 		this.sibs.processOperations();
 		this.sibs.processOperations();
 		
-		assertEquals(894, this.services.getAccountByIban(sourceIban).getBalance());
-		assertEquals(1100, this.services.getAccountByIban(targetIban).getBalance());
+		assertEquals(894, this.services.getAccountByIban(this.sourceIban).getBalance());
+		assertEquals(1100, this.services.getAccountByIban(this.targetIban).getBalance());
 		assertEquals(Completed.instance(), transfer.getState());
 	}
 	
 	@Test
 	public void cancelOperationsTest() throws SibsException, AccountException, OperationException {
-		int id = this.sibs.transfer(sourceIban, targetIban, 100);
+		int id = this.sibs.transfer(this.sourceIban, this.targetIban, 100);
 		
 		TransferOperation transfer = (TransferOperation) this.sibs.getOperation(id);
 		
@@ -99,14 +99,18 @@ public class SibsMethodsTest {
 		this.sibs.processOperations();
 		this.sibs.cancelOperation(id);
 		
-		assertEquals(1000, this.services.getAccountByIban(sourceIban).getBalance());
-		assertEquals(1000, this.services.getAccountByIban(targetIban).getBalance());
+		assertEquals(1000, this.services.getAccountByIban(this.sourceIban).getBalance());
+		assertEquals(1000, this.services.getAccountByIban(this.targetIban).getBalance());
 		assertEquals(Canceled.instance(), transfer.getState());
 	}
 	
 	@After
 	public void tearDown() {
 		this.sibs = null;
+		
+		this.sourceClient = null;
+		this.targetClient = null;
+		
 		Bank.clearBanks();
 	}
 }

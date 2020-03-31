@@ -25,7 +25,7 @@ public class Withdrawn implements State{
 	
 				services.deposit(targetIban, operation.getValue());
 				
-				if (sourceIban.contentEquals(targetIban)) {
+				if (sourceIban.substring(0, 3).contentEquals(targetIban.substring(0, 3))) {
 					operation.setState(Completed.instance());
 					
 				} else {
