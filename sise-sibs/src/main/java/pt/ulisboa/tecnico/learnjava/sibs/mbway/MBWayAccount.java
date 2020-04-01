@@ -21,7 +21,13 @@ public class MBWayAccount {
 	
 	private static HashMap<Integer, MBWayAccount> accounts = new HashMap<Integer, MBWayAccount>();
 	
-	public MBWayAccount(String iban, int phoneNumber) throws MBWayException {
+	public MBWayAccount(String iban, int phoneNumber, Services services) throws MBWayException {
+		this.iban = iban;
+		this.phoneNumber = phoneNumber;
+		this.nConfirmation = (int) (Math.random() * 900000) + 100000;
+		this.services = services;
+		this.sibs = new Sibs(100, this.services);
+		
 		if (accounts.containsKey(phoneNumber)) {
 			throw new MBWayException("Phone number already in use.");
 		} else if (phoneNumber<100000000 || phoneNumber > 999999999){
@@ -29,12 +35,6 @@ public class MBWayAccount {
 		} else if (services.getAccountByIban(iban) == null) {
 			throw new MBWayException("There is no such iban.");
 		}
-		
-		this.iban = iban;
-		this.phoneNumber = phoneNumber;
-		this.nConfirmation = (int) (Math.random() * 100000);
-		this.services = new Services();
-		this.sibs = new Sibs(100, this.services);
 		
 		accounts.put(phoneNumber, this);
 	}
@@ -89,11 +89,11 @@ public class MBWayAccount {
 		int counter = 0;
 		for (int phoneNumber : keys) {
 			if (phoneNumber != getPhoneNumber()) {
-				counter += friends.get(phoneNumber);
 				if (MBWayAccount.getMBWayAccount(phoneNumber).getBalance() < friends.get(phoneNumber)) {
 					throw new MBWayException("A friend doesn't have enough money.");
 				}
 			}
+			counter += friends.get(phoneNumber);
 		}
 		
 		if (counter != totalAmount) {
@@ -117,7 +117,5 @@ public class MBWayAccount {
 	public static void clearMBWayAccounts() {
 		accounts.clear();
 	}
-	
-	
 	
 }

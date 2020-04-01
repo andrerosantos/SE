@@ -9,7 +9,6 @@ import pt.ulisboa.tecnico.learnjava.bank.exceptions.AccountException;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.BankException;
 import pt.ulisboa.tecnico.learnjava.bank.exceptions.ClientException;
 import pt.ulisboa.tecnico.learnjava.bank.services.Services;
-import pt.ulisboa.tecnico.learnjava.sibs.domain.Sibs;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
 
@@ -24,8 +23,9 @@ public class MVC {
 		String input;
 		String[] inputs;
 		String command;
+		Services services = new Services();
 		
-		Controller controller = new Controller();
+		Controller controller = new Controller(services);
 		
 		HashMap<Integer, Integer> friends = new HashMap<Integer, Integer>();
 		int receiver = 0;
@@ -48,6 +48,7 @@ public class MVC {
 					controller.createMBWay(inputs[1], Integer.parseInt(inputs[2]));
 					break;
 					
+				// To confirm account: confirm-mbway <phoneNumber> <confirmationCode>
 				case "confirm-mbway":
 					controller.confirmAccount(Integer.parseInt(inputs[1]), Integer.parseInt(inputs[2]));
 					break;
@@ -75,7 +76,7 @@ public class MVC {
 				}
 				
 			} catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
-				System.out.println("Please check yout input.");
+				System.out.println("Please check your input.");
 			}
 			
 		}

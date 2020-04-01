@@ -15,14 +15,14 @@ public class Controller {
 	private Services services;
 	private Sibs sibs;
 	
-	public Controller() { 
-		this.services = new Services();
+	public Controller(Services services) { 
+		this.services = services;
 		this.sibs = new Sibs(100, this.services);
 	}
 
 	public void createMBWay(String iban, int phoneNumber)  {
 		try {
-		MBWayAccount model = new MBWayAccount(iban, phoneNumber);
+		MBWayAccount model = new MBWayAccount(iban, phoneNumber, this.services);
 		view.printConfirmationCode(model.getConfirmationCode());
 		} catch (MBWayException e) {
 			view.printException(e.getMessage());
@@ -90,6 +90,7 @@ public class Controller {
 			MBWayAccount.getMBWayAccount(phoneNumber);
 			return true;
 		} catch (Exception e) {
+			view.printNoSuchAccounts();
 			return false;
 		}
 	}
