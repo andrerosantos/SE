@@ -9,6 +9,7 @@ import pt.ulisboa.tecnico.learnjava.sibs.domain.Sibs;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.MBWayException;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
+import pt.ulisboa.tecnico.learnjava.sibs.states.Completed;
 
 public class MBWayAccount {
 	private String iban;
@@ -47,14 +48,6 @@ public class MBWayAccount {
 		return this.phoneNumber;
 	}
 	
-	public void setIban(String iban) {
-		this.iban = iban;
-	}
-	
-	public void setPhoneNumber(int phoneNumber) {
-		this.phoneNumber = phoneNumber;
-	}
-	
 	public int getConfirmationCode() {
 		return this.nConfirmation;
 	}
@@ -73,15 +66,31 @@ public class MBWayAccount {
 	}
 	
 	public int getBalance() {
-		Services service = new Services();
-		return service.getAccountByIban(this.iban).getBalance();
+		return services.getAccountByIban(this.iban).getBalance();
 	}
 	
 	public void transferMoney(MBWayAccount tragetAccount, int amount) throws SibsException, AccountException, OperationException, MBWayException {
 		if(!isConfirmed() || !tragetAccount.isConfirmed()) {
 			throw new MBWayException("One or more MBWay Accounts are not confirmed!");
+		} else if (this.services.getAccountByIban(getIban()).getBalance() < amount) {
+			throw new MBWayException("Not enough money in the source account!");
 		}
-		this.sibs.transfer(getIban(), tragetAccount.getIban(), amount);
+		
+		int opreationID = this.sibs.transfer(getIban(), tragetAccount.getIban(), amount);
+		
+		this.sibs.getOperation(opreationID).process();
+		this.sibs.getOperation(opreationID).process();
+		this.sibs.getOperation(opreationID).process();
+		
+		// Do all the retries:
+		this.sibs.getOperation(opreationID).process();
+		this.sibs.getOperation(opreationID).process();
+		this.sibs.getOperation(opreationID).process();
+		
+		if (this.sibs.getOperation(opreationID).getState() != Completed.instance()) {
+			throw new MBWayException("Something went wrong - the operation didn't happened!");
+		}
+		
 	}
 	
 	public void splitBill(HashMap<Integer, Integer> friends, int totalAmount) throws MBWayException, SibsException, AccountException, OperationException {
@@ -100,9 +109,12 @@ public class MBWayAccount {
 			throw new MBWayException("Something is wrong. Did you set the bill amount right?");
 		}
 		
+		Set<Integer> transferIds;
 		for (int phoneNumber : keys) {
-			MBWayAccount friend = MBWayAccount.getMBWayAccount(phoneNumber);
-			friend.transferMoney(this, friends.get(phoneNumber));
+			if (phoneNumber != getPhoneNumber()) {
+				MBWayAccount friend = MBWayAccount.getMBWayAccount(phoneNumber);
+				friend.transferMoney(this, friends.get(phoneNumber));
+			}
 		}
 	}
 	

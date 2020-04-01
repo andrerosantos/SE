@@ -61,9 +61,9 @@ public class Controller {
 		int counter = 0;
 		int amount = 0;
 		
-		if (friends.size() > numberOfFriends) {
+		if (friends.size() < numberOfFriends) {
 			view.printNotEnoughFriends();
-		} else if (friends.size() < numberOfFriends) {
+		} else if (friends.size() > numberOfFriends) {
 			view.printTooManyFriends();
 		} else {
 			try {
