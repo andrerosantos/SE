@@ -10,12 +10,13 @@ import pt.ulisboa.tecnico.learnjava.sibs.exceptions.OperationException;
 import pt.ulisboa.tecnico.learnjava.sibs.exceptions.SibsException;
 
 public class Controller {
-	private View view = new View();
+	private View view;
 	private boolean running = true;
 	private Services services;
 	private Sibs sibs;
 	
-	public Controller(Services services) { 
+	public Controller(Services services, View view) { 
+		this.view = view;
 		this.services = services;
 		this.sibs = new Sibs(100, this.services);
 	}
@@ -51,6 +52,8 @@ public class Controller {
 			
 			source.transferMoney(target, amount);
 			
+			view.printSuccessfulTransfer();
+			
 		} catch (Exception e) {
 			view.printException(e.getMessage());
 		}
@@ -68,7 +71,9 @@ public class Controller {
 		} else {
 			try {
 				MBWayAccount receiverAcc = MBWayAccount.getMBWayAccount(receiver);
-				receiverAcc.splitBill(friends, totalAmount, numberOfFriends);
+				
+				// Removed the number of friends to improve the guideline "Keep unit interfaces small"
+				receiverAcc.splitBill(friends, totalAmount);
 				view.printSuccessSplitBill();
 			} catch (Exception e) {
 				view.printException(e.getMessage());

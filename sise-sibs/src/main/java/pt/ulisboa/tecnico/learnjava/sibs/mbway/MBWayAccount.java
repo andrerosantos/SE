@@ -93,7 +93,8 @@ public class MBWayAccount {
 		
 	}
 	
-	public void splitBill(HashMap<Integer, Integer> friends, int totalAmount, int totalfriends) throws MBWayException, SibsException, AccountException, OperationException {
+	// Removed the number of friends to improve the guideline "Keep unit interfaces small"
+	public void splitBill(HashMap<Integer, Integer> friends, int totalAmount) throws MBWayException, SibsException, AccountException, OperationException {
 		Set<Integer> keys = friends.keySet();
 		int counter = 0;
 		for (int phoneNumber : keys) {

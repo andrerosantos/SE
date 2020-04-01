@@ -9,7 +9,7 @@ public class View {
 	   }
 	
 	public void printConfirmationCode(int code) {
-		System.out.println("Code: " + code);
+		System.out.println("Code: " + code + " (don't share it with anyone)");
 	}
 	
 	public void printConfirmationResult(boolean result) {

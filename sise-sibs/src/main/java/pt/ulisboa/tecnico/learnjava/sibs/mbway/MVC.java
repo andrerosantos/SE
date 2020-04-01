@@ -24,8 +24,9 @@ public class MVC {
 		String[] inputs;
 		String command;
 		Services services = new Services();
+		View view = new View();
 		
-		Controller controller = new Controller(services);
+		Controller controller = new Controller(services, view);
 		
 		HashMap<Integer, Integer> friends = new HashMap<Integer, Integer>();
 		int receiver = 0;
