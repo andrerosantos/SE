@@ -109,7 +109,6 @@ public class MBWayAccount {
 			throw new MBWayException("Something is wrong. Did you set the bill amount right?");
 		}
 		
-		Set<Integer> transferIds;
 		for (int phoneNumber : keys) {
 			if (phoneNumber != getPhoneNumber()) {
 				MBWayAccount friend = MBWayAccount.getMBWayAccount(phoneNumber);

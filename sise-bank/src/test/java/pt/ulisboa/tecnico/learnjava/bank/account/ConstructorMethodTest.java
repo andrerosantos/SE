@@ -37,14 +37,9 @@ public class ConstructorMethodTest {
 		assertTrue(this.client.hasAccount(account));
 	}
 
-	@Test
-	public void nullClient() throws ClientException {
-		try {
-			new CheckingAccount(null, AMOUNT);
-			fail();
-		} catch (AccountException e) {
-			// passes
-		}
+	@Test (expected=AccountException.class)
+	public void nullClient() throws ClientException, AccountException {
+		new CheckingAccount(null, AMOUNT);
 	}
 
 	@Test

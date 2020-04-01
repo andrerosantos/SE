@@ -179,7 +179,7 @@ public class MBWayAccountMethodsTest {
 		acc.splitBill(friends, 150);
 	}
 	
-	@Test
+	@Test (expected=MBWayException.class)
 	public void wrongQuantityFriendsMbwaySplitBillMethodTest() throws MBWayException, SibsException, AccountException, OperationException {
 		String iban2 = "iban2";
 		String iban3 = "iban3";
@@ -210,11 +210,7 @@ public class MBWayAccountMethodsTest {
 		friends.put(phoneNumber2, 50);
 		friends.put(phoneNumber3, 50);
 		
-		try {
-			acc.splitBill(friends, 200);
-		} catch (Exception e) {
-			
-		}
+		acc.splitBill(friends, 200);
 	}
 		
 	
