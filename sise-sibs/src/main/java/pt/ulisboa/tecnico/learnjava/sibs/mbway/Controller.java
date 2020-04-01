@@ -68,7 +68,7 @@ public class Controller {
 		} else {
 			try {
 				MBWayAccount receiverAcc = MBWayAccount.getMBWayAccount(receiver);
-				receiverAcc.splitBill(friends, totalAmount);
+				receiverAcc.splitBill(friends, totalAmount, numberOfFriends);
 				view.printSuccessSplitBill();
 			} catch (Exception e) {
 				view.printException(e.getMessage());

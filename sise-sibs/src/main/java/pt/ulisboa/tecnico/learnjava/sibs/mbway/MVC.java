@@ -16,7 +16,7 @@ public class MVC {
 	public static void main(String[] args) throws BankException, ClientException, AccountException, NumberFormatException, SibsException, OperationException {
 		
 		// Use 'BPICK1', 'BPICK2', 'BPICK3' and 'BPICK4' as IBAN values
-		//accountsCreation();
+		accountsCreation();
 		
 		boolean running = true;
 		Scanner s = new Scanner(System.in);
@@ -82,7 +82,10 @@ public class MVC {
 		}
 	}
 	
-	/*
+	// this method is only good for testing
+	// removing this method allows us to pass the following guidelines:
+		//Separate concerns in modules
+		// Couple architecture components loosely
 	public static void accountsCreation() throws BankException, ClientException, AccountException {
 		Bank bpi = new Bank("BPI");
 		
@@ -96,6 +99,6 @@ public class MVC {
 		bpi.createAccount(Bank.AccountType.CHECKING, client3, 1000, 0);
 		bpi.createAccount(Bank.AccountType.CHECKING, client4, 1000, 0);
 	}
-	*/
+	
 	
 }
